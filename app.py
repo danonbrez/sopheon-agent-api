@@ -6,12 +6,14 @@ import os
 import ssl
 from requests.adapters import HTTPAdapter
 from requests.packages.urllib3.poolmanager import PoolManager
+import certifi
 
 class SSLAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False):
         self.poolmanager = PoolManager(
             num_pools=connections, maxsize=maxsize,
-            block=block, ssl_version=ssl.PROTOCOL_TLS)
+            block=block, cert_reqs='CERT_REQUIRED',
+            ca_certs=certifi.where())
 
 app = Flask(__name__)
 
@@ -29,8 +31,14 @@ def call_gpt40_api(task):
     payload = {"query": task}
     session = requests.Session()
     session.mount("https://", SSLAdapter())
-    response = session.post(GPT40_API_URL, json=payload, headers=headers, verify=False)
-    return response.json()
+    try:
+        response = session.post(GPT40_API_URL, json=payload, headers=headers)
+        response.raise_for_status()
+        return response.json()
+    except requests.exceptions.SSLError as e:
+        return {"error": "SSL error occurred", "details": str(e)}
+    except requests.exceptions.RequestException as e:
+        return {"error": "Request failed", "details": str(e)}
 
 @app.route('/agents', methods=['POST'])
 def spawn_agent():
