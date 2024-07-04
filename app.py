@@ -24,15 +24,18 @@ def call_gpt40_api(task):
 @app.route('/agents', methods=['POST'])
 def spawn_agent():
     data = request.json
-    agent_id = str(uuid.uuid4())
-    agents[agent_id] = {
-        'name': data['name'],
-        'task': data['task'],
-        'priority': data['priority'],
-        'status': 'idle',
-        'result': None
-    }
-    return jsonify({'agentId': agent_id}), 201
+    try:
+        agent_id = str(uuid.uuid4())
+        agents[agent_id] = {
+            'name': data['name'],
+            'task': data['task'],
+            'priority': data['priority'],
+            'status': 'idle',
+            'result': None
+        }
+        return jsonify({'agentId': agent_id}), 201
+    except KeyError as e:
+        return jsonify({'error': f'Missing key in request data: {e.args[0]}'}), 400
 
 @app.route('/agents/<agent_id>', methods=['GET'])
 def get_agent_status(agent_id):
@@ -59,13 +62,16 @@ def assign_task(agent_id):
     agent = agents.get(agent_id)
     if agent:
         data = request.json
-        agent['task'] = data['task']
-        agent['priority'] = data['priority']
-        agent['status'] = 'working'
-        result = call_gpt40_api(agent['task'])
-        agent['result'] = result['response']  # Adjust based on API response structure
-        agent['status'] = 'completed'
-        return jsonify({'message': 'Task assigned successfully'}), 200
+        try:
+            agent['task'] = data['task']
+            agent['priority'] = data['priority']
+            agent['status'] = 'working'
+            result = call_gpt40_api(agent['task'])
+            agent['result'] = result['response']  # Adjust based on API response structure
+            agent['status'] = 'completed'
+            return jsonify({'message': 'Task assigned successfully'}), 200
+        except KeyError as e:
+            return jsonify({'error': f'Missing key in request data: {e.args[0]}'}), 400
     else:
         return jsonify({'error': 'Agent not found'}), 404
 
