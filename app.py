@@ -70,11 +70,13 @@ def assign_task(agent_id):
     agent = agents.get(agent_id)
     if agent:
         data = request.json
+        if 'task' not in data or 'priority' not in data:
+            return jsonify({'error': 'Missing required parameters: task, priority'}), 400
         agent['task'] = data['task']
         agent['priority'] = data['priority']
         agent['status'] = 'working'
         result = call_gpt40_api(agent['task'])
-        agent['result'] = result['response']  # Adjust based on API response structure
+        agent['result'] = result.get('response', 'No response')  # Adjust based on API response structure
         agent['status'] = 'completed'
         return jsonify({'message': 'Task assigned successfully'}), 200
     else:
