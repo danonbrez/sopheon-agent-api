@@ -12,7 +12,7 @@ class SSLAdapter(HTTPAdapter):
     def init_poolmanager(self, connections, maxsize, block=False):
         self.poolmanager = PoolManager(
             num_pools=connections, maxsize=maxsize,
-            block=block, cert_reqs='CERT_REQUIRED',
+            block=block, cert_reqs=ssl.CERT_REQUIRED,
             ca_certs=certifi.where())
 
 app = Flask(__name__)
