@@ -32,7 +32,7 @@ def call_gpt40_api(task):
     session = requests.Session()
     session.mount("https://", SSLAdapter())
     try:
-        response = session.post(GPT40_API_URL, json=payload, headers=headers)
+        response = session.post(GPT40_API_URL, json=payload, headers=headers, verify=certifi.where())
         response.raise_for_status()
         return response.json()
     except requests.exceptions.SSLError as e:
