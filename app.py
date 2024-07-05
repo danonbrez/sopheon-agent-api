@@ -1,36 +1,51 @@
-from flask import Flask, request, jsonify
-from agent import create_agent, assign_task, get_agent_status, terminate_agent
-from config import Config
+from flask import Flask, request, redirect, session, url_for
+import requests
+import os
 
 app = Flask(__name__)
-app.config.from_object(Config)
+app.secret_key = os.getenv('SECRET_KEY')
 
-@app.route('/agents', methods=['POST'])
-def create_agent_route():
-    data = request.get_json()
-    name = data.get('name')
-    task = data.get('task')
-    priority = data.get('priority')
-    agent_id = create_agent(name, task, priority)
-    return jsonify({"agentId": agent_id})
+NOTION_CLIENT_ID = os.getenv('NOTION_CLIENT_ID')
+NOTION_CLIENT_SECRET = os.getenv('NOTION_CLIENT_SECRET')
+NOTION_REDIRECT_URI = os.getenv('NOTION_REDIRECT_URI')
 
-@app.route('/agents/<agent_id>/tasks', methods=['POST'])
-def assign_task_route(agent_id):
-    data = request.get_json()
-    task = data.get('task')
-    priority = data.get('priority')
-    response = assign_task(agent_id, task, priority)
-    return jsonify(response)
+@app.route('/')
+def index():
+    return 'Welcome to Sopheon'
 
-@app.route('/agents/<agent_id>', methods=['GET'])
-def get_agent_status_route(agent_id):
-    response = get_agent_status(agent_id)
-    return jsonify(response)
+@app.route('/authorize')
+def authorize():
+    notion_authorize_url = (
+        f"https://api.notion.com/v1/oauth/authorize?client_id={NOTION_CLIENT_ID}"
+        f"&response_type=code&owner=user&redirect_uri={NOTION_REDIRECT_URI}"
+    )
+    return redirect(notion_authorize_url)
 
-@app.route('/agents/<agent_id>', methods=['DELETE'])
-def terminate_agent_route(agent_id):
-    response = terminate_agent(agent_id)
-    return jsonify(response)
+@app.route('/oauth/callback')
+def oauth_callback():
+    code = request.args.get('code')
+    if not code:
+        return 'Authorization failed', 400
+
+    token_url = "https://api.notion.com/v1/oauth/token"
+    token_data = {
+        'grant_type': 'authorization_code',
+        'code': code,
+        'redirect_uri': NOTION_REDIRECT_URI,
+        'client_id': NOTION_CLIENT_ID,
+        'client_secret': NOTION_CLIENT_SECRET,
+    }
+    response = requests.post(token_url, data=token_data)
+    if response.status_code != 200:
+        return 'Token exchange failed', 400
+
+    token_json = response.json()
+    access_token = token_json.get('access_token')
+
+    # Store access_token securely in your database or session
+    session['notion_access_token'] = access_token
+
+    return 'Authorization successful'
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)
