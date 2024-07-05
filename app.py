@@ -43,6 +43,8 @@ def call_gpt40_api(task):
 @app.route('/agents', methods=['POST'])
 def spawn_agent():
     data = request.json
+    if 'name' not in data or 'task' not in data or 'priority' not in data:
+        return jsonify({'error': 'Missing required parameters: name, task, priority'}), 400
     agent_id = str(uuid.uuid4())
     agents[agent_id] = {
         'name': data['name'],
@@ -78,7 +80,7 @@ def assign_task(agent_id):
     agent = agents.get(agent_id)
     if agent:
         data = request.json
-        if 'task' not in data or 'priority' not in data:
+        if not data or 'task' not in data or 'priority' not in data:
             return jsonify({'error': 'Missing required parameters: task, priority'}), 400
         agent['task'] = data['task']
         agent['priority'] = data['priority']
