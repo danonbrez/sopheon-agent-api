@@ -31,6 +31,10 @@ def chat():
     
     # Define the payload for GPT-4 API using the chat/completions endpoint
     try:
+        headers = {
+            "Content-Type": "application/json",
+            "OpenAI-Beta": "assistants=v2"
+        }
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
@@ -39,8 +43,8 @@ def chat():
             ],
             max_tokens=150,  # Increase this value to allow for longer responses
             temperature=0.7,
-            # Include the Assistant ID correctly
-            user="assistant_id:" + ASSISTANT_ID
+            user="assistant_id:" + ASSISTANT_ID,
+            headers=headers  # Include the required beta header
         )
         
         if response:
