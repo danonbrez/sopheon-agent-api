@@ -36,7 +36,7 @@ def chat():
             messages=[
                 {"role": "user", "content": user_message}
             ],
-            max_tokens=50,
+            max_tokens=150,  # Increase this value to allow for longer responses
             temperature=0.7
         )
         
