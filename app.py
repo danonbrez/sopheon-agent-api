@@ -68,7 +68,8 @@ def use_trigram_agents():
             logging.debug(f"Agent Response: {agent_response}")
             return jsonify(agent_response)
         else:
-            return jsonify({"message": "I apologize, but the agent API call failed."})
+            logging.error(f"Agent API call failed with status code {response.status_code} and response: {response.text}")
+            return jsonify({"message": f"Agent API call failed with status code {response.status_code}", "details": response.text})
     except Exception as e:
         logging.error(f"Error in useTrigramAgents endpoint: {str(e)}")
         return jsonify({"message": f"Error: {str(e)}"})
