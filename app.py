@@ -3,6 +3,7 @@ import openai
 from dotenv import load_dotenv
 import os
 import logging
+import requests
 import certifi
 
 load_dotenv()  # Load environment variables from .env file
@@ -55,20 +56,17 @@ def use_trigram_agents():
     logging.debug(f"Received query for trigram agents: {query}")
     
     try:
-        # Using openai.ChatCompletion.create to simulate the trigram agent call
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "user", "content": f"Trigram agents, process the following query: {query}"}
-            ],
-            max_tokens=150,
-            temperature=0.7
+        # Send the request to the trigram agent API
+        response = requests.post(
+            "https://sopheon-agent-api-4cb6de5c7ca8.herokuapp.com/useTrigramAgents",
+            json={"mainQuery": query},
+            headers={"Content-Type": "application/json"}
         )
         
-        if response:
-            agent_message = response['choices'][0]['message']['content'].strip()
-            logging.debug(f"Agent Response: {agent_message}")
-            return jsonify({"message": agent_message})
+        if response.status_code == 200:
+            agent_response = response.json()
+            logging.debug(f"Agent Response: {agent_response}")
+            return jsonify(agent_response)
         else:
             return jsonify({"message": "I apologize, but the agent API call failed."})
     except Exception as e:
