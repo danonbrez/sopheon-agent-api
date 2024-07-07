@@ -28,17 +28,19 @@ def chat():
     user_message = request.json['message']
     logging.debug(f"User Message: {user_message}")
     
-    # Define the payload for GPT-4 API
+    # Define the payload for GPT-4 API using the chat/completions endpoint
     try:
-        response = openai.Completion.create(
+        response = openai.ChatCompletion.create(
             model="gpt-4",
-            prompt=user_message,
+            messages=[
+                {"role": "user", "content": user_message}
+            ],
             max_tokens=50,
             temperature=0.7
         )
         
         if response:
-            assistant_message = response.choices[0].text.strip()
+            assistant_message = response.choices[0].message["content"].strip()
             logging.debug(f"Assistant Message: {assistant_message}")
             return jsonify({"message": assistant_message})
         else:
@@ -53,16 +55,18 @@ def use_trigram_agents():
     logging.debug(f"Received query for trigram agents: {query}")
     
     try:
-        # Using openai.Completion.create to simulate the trigram agent call
-        response = openai.Completion.create(
+        # Using openai.ChatCompletion.create to simulate the trigram agent call
+        response = openai.ChatCompletion.create(
             model="gpt-4",
-            prompt=f"Trigram agents, process the following query: {query}",
+            messages=[
+                {"role": "user", "content": f"Trigram agents, process the following query: {query}"}
+            ],
             max_tokens=150,
             temperature=0.7
         )
         
         if response:
-            agent_message = response.choices[0].text.strip()
+            agent_message = response.choices[0].message["content"].strip()
             logging.debug(f"Agent Response: {agent_message}")
             return jsonify({"message": agent_message})
         else:
