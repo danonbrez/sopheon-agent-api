@@ -38,7 +38,7 @@ def use_trigram_agents():
     responses = []
     for i, query in enumerate(sub_queries):
         response = generate_response(query)
-        agent_name = f"Agent{i + 1}_{sub_queries[i].split()[1]}"
+        agent_name = f"Agent{i + 1}_{query.split()[1]}"
         responses.append({"agentName": agent_name, "response": response})
 
     final_response = f"Combined response for {main_query}"
