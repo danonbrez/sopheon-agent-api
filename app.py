@@ -49,16 +49,18 @@ def use_trigram_agents():
     logging.debug(f"Received query for trigram agents: {query}")
     
     try:
-        # Making a call to the agent API (this should be updated with the actual endpoint and structure)
-        agent_response = openai.Function.call(
-            assistant_id=ASSISTANT_ID,
-            function_name="useTrigramAgents",
-            parameters={"mainQuery": query}
+        # Using openai.Completion.create to simulate the trigram agent call
+        response = openai.Completion.create(
+            model="gpt-4",
+            prompt=f"Trigram agents, process the following query: {query}",
+            max_tokens=150,
+            temperature=0.7
         )
         
-        if agent_response:
-            logging.debug(f"Agent Response: {agent_response}")
-            return jsonify(agent_response)
+        if response:
+            agent_message = response.choices[0].text.strip()
+            logging.debug(f"Agent Response: {agent_message}")
+            return jsonify({"message": agent_message})
         else:
             return jsonify({"message": "I apologize, but the agent API call failed."})
     except Exception as e:
