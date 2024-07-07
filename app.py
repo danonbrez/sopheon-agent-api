@@ -15,7 +15,7 @@ logging.basicConfig(level=logging.DEBUG)
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Define the Assistant ID from the screenshot
-ASSISTANT_ID = "asst_rONRVfEEL2eup5TGf71WEyYK"
+ASSISTANT_ID = "asst_r0NRV1EEL2eup5TGf71WEyYK"
 
 # Ensure Certifi is used for SSL certificate verification
 os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
@@ -37,7 +37,8 @@ def chat():
                 {"role": "user", "content": user_message}
             ],
             max_tokens=150,  # Increase this value to allow for longer responses
-            temperature=0.7
+            temperature=0.7,
+            assistant_id=ASSISTANT_ID  # Specify the Assistant ID
         )
         
         if response:
