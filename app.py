@@ -1,50 +1,64 @@
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 import openai
+from dotenv import load_dotenv
 import os
+
+load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
 
-# Ensure you have your OpenAI API key set
-openai.api_key = os.getenv('OPENAI_API_KEY')
+# Load OpenAI API key from environment variable
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def generate_response(prompt):
-    try:
-        response = openai.Completion.create(
-            engine="davinci-codex",  # Use the appropriate engine
-            prompt=prompt,
-            max_tokens=150  # Adjust the token limit as needed
+# Create a global assistant object
+assistant = openai.beta.assistants.create(
+    name="Sopheon",
+    instructions="You are Sopheon, a wise and empathetic AI assistant. Provide thoughtful and helpful responses.",
+    tools=[{"type": "code_interpreter"}],
+    model="gpt-4-1106-preview"
+)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/chat', methods=['POST'])
+def chat():
+    user_message = request.json['message']
+
+    # Create a new thread for each conversation
+    thread = openai.beta.threads.create()
+
+    # Add the user's message to the thread
+    openai.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=user_message
+    )
+
+    # Run the assistant
+    run = openai.beta.threads.runs.create(
+        thread_id=thread.id,
+        assistant_id=assistant.id
+    )
+
+    # Wait for the run to complete
+    while run.status != "completed":
+        run = openai.beta.threads.runs.retrieve(
+            thread_id=thread.id,
+            run_id=run.id
         )
-        return response.choices[0].text.strip()
-    except Exception as e:
-        return f"Error generating response: {str(e)}"
 
-@app.route('/useTrigramAgents', methods=['POST'])
-def use_trigram_agents():
-    data = request.json
-    main_query = data.get('mainQuery')
+    # Retrieve the assistant's messages
+    messages = openai.beta.threads.messages.list(thread_id=thread.id)
 
-    # Define sub-queries for each agent
-    sub_queries = [
-        f"Define the overall strategy for {main_query}",
-        f"Describe the positive impacts of {main_query}",
-        f"Explain the importance of clarity in {main_query}",
-        f"Identify the urgent actions required for {main_query}",
-        f"Discuss the holistic considerations for {main_query}",
-        f"Analyze the complexities involved in {main_query}",
-        f"Outline the fundamental principles for {main_query}",
-        f"Assess the adaptability required for {main_query}"
-    ]
+    # Get the last message from the assistant
+    assistant_message = next((msg for msg in messages if msg.role == "assistant"), None)
 
-    # Generate responses using the language model
-    responses = []
-    for i, query in enumerate(sub_queries):
-        response = generate_response(query)
-        agent_name = f"Agent{i + 1}_{query.split()[1]}"
-        responses.append({"agentName": agent_name, "response": response})
+    if assistant_message:
+        return jsonify({"message": assistant_message.content[0].text.value})
+    else:
+        return jsonify({"message": "I apologize, but I couldn't generate a response."})
 
-    final_response = f"Combined response for {main_query}"
-    return jsonify({"finalResponse": final_response, "individualResponses": responses})
-
-if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+if __name__ == "__main__":
+    app.run(debug=True)
