@@ -40,7 +40,7 @@ def chat():
         )
         
         if response:
-            assistant_message = response.choices[0].message["content"].strip()
+            assistant_message = response['choices'][0]['message']['content'].strip()
             logging.debug(f"Assistant Message: {assistant_message}")
             return jsonify({"message": assistant_message})
         else:
@@ -66,7 +66,7 @@ def use_trigram_agents():
         )
         
         if response:
-            agent_message = response.choices[0].message["content"].strip()
+            agent_message = response['choices'][0]['message']['content'].strip()
             logging.debug(f"Agent Response: {agent_message}")
             return jsonify({"message": agent_message})
         else:
