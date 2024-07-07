@@ -3,6 +3,7 @@ import openai
 from dotenv import load_dotenv
 import os
 import logging
+import certifi
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -14,6 +15,9 @@ openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Define the Assistant ID from the screenshot
 ASSISTANT_ID = "asst_rONRVfEEL2eup5TGf71WEyYK"
+
+# Ensure Certifi is used for SSL certificate verification
+os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
 
 @app.route('/')
 def index():
