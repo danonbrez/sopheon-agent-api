@@ -45,6 +45,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
+            max-height: 70vh; /* Ensure the chat body does not exceed the viewport height */
         }
         .message {
             margin: 10px 0;
@@ -55,6 +56,8 @@
             line-height: 1.5;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
+            word-wrap: break-word; /* Ensure long words break correctly */
+            white-space: pre-wrap; /* Preserve whitespace and allow line breaks */
         }
         .message.user-message {
             background: rgba(255, 255, 255, 0.1);
