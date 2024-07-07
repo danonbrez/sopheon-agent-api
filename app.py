@@ -1,10 +1,11 @@
 from flask import Flask, request, jsonify
 import openai
+import os
 
 app = Flask(__name__)
 
 # Ensure you have your OpenAI API key set
-openai.api_key = 'sk-proj-nKnoBh45XcWCMyUDy8vpT3BlbkFJgCr2F7ZPYyxPrZ6bR9Yj'
+openai.api_key = os.getenv('OPENAI_API_KEY')
 
 def generate_response(prompt):
     try:
