@@ -39,7 +39,8 @@ def chat():
             ],
             max_tokens=150,  # Increase this value to allow for longer responses
             temperature=0.7,
-            assistant_id=ASSISTANT_ID  # Specify the Assistant ID correctly
+            # Include the Assistant ID correctly
+            user="assistant_id:" + ASSISTANT_ID
         )
         
         if response:
