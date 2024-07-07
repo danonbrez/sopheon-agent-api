@@ -58,6 +58,23 @@
             backdrop-filter: blur(10px);
             word-wrap: break-word; /* Ensure long words break correctly */
             white-space: pre-wrap; /* Preserve whitespace and allow line breaks */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .message p {
+            flex: 1;
+            margin: 0;
+            padding-right: 10px; /* Space for the copy button */
+            cursor: text; /* Indicate the message is editable */
+        }
+        .message button {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: #fff;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
         }
         .message.user-message {
             background: rgba(255, 255, 255, 0.1);
@@ -156,9 +173,31 @@
             const messagesDiv = document.getElementById('messages');
             const messageDiv = document.createElement('div');
             messageDiv.className = `message ${role}-message`;
-            messageDiv.textContent = content;
+            
+            const messageText = document.createElement('p');
+            messageText.contentEditable = true;
+            messageText.textContent = content;
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Copy';
+            copyButton.onclick = function() {
+                copyToClipboard(content);
+            };
+
+            messageDiv.appendChild(messageText);
+            messageDiv.appendChild(copyButton);
+
             messagesDiv.appendChild(messageDiv);
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
         }
 
         // Allow sending message with Enter key
