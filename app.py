@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 import logging
 import certifi
-import time
 
 load_dotenv()  # Load environment variables from .env file
 
@@ -35,40 +34,24 @@ def chat():
     }
 
     try:
-        # Create a thread for the assistant
-        thread = openai.Thread.create()
-
-        # Create a message in the thread
-        message = openai.ThreadMessage.create(
-            thread_id=thread.id,
-            role="user",
-            content=user_message
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": user_message}
+            ],
+            max_tokens=150,
+            temperature=0.7,
+            user="assistant_id:" + ASSISTANT_ID,
+            headers=headers
         )
 
-        # Create a run for the assistant in the thread
-        run = openai.ThreadRun.create(
-            thread_id=thread.id,
-            assistant_id=ASSISTANT_ID,
-        )
-
-        # Wait for the run to complete
-        while run.status not in ["completed", "requires_action"]:
-            time.sleep(1)
-            run = openai.ThreadRun.retrieve(
-                thread_id=thread.id,
-                run_id=run.id
-            )
-
-        # Get the assistant's response from the thread messages
-        messages = openai.ThreadMessage.list(
-            thread_id=thread.id,
-            order="asc"
-        )
-
-        assistant_message = messages.data[-1].content
-
-        logging.debug(f"Assistant Message: {assistant_message}")
-        return jsonify({"message": assistant_message})
+        if response:
+            assistant_message = response['choices'][0]['message']['content'].strip()
+            logging.debug(f"Assistant Message: {assistant_message}")
+            return jsonify({"message": assistant_message})
+        else:
+            return jsonify({"message": "I apologize, but I couldn't generate a response."})
     except Exception as e:
         logging.error(f"Error in chat endpoint: {str(e)}")
         return jsonify({"message": f"Error: {str(e)}"})
