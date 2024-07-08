@@ -2,7 +2,7 @@ import os
 import logging
 import certifi
 from flask import Flask, render_template, request, jsonify
-from openai import OpenAI
+import openai
 from dotenv import load_dotenv
 
 # Load environment variables from .env file (for local development)
@@ -12,7 +12,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize the OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Define the Assistant ID
 ASSISTANT_ID = "asst_r0NRV1EEL2eup5TGf71WEyYK"
@@ -31,31 +31,31 @@ def chat():
 
     try:
         # Create a new thread
-        thread = client.beta.threads.create()
+        thread = openai.Thread.create()
 
         # Add a message to the thread
-        client.beta.threads.messages.create(
+        openai.Thread.add_message(
             thread_id=thread.id,
             role="user",
             content=user_message
         )
 
         # Run the assistant
-        run = client.beta.threads.runs.create(
+        run = openai.Thread.run(
             thread_id=thread.id,
             assistant_id=ASSISTANT_ID,
         )
 
         # Wait for the run to complete
         while run.status != "completed":
-            run = client.beta.threads.runs.retrieve(
+            run = openai.Thread.retrieve_run(
                 thread_id=thread.id,
                 run_id=run.id
             )
 
         # Retrieve the assistant's response
-        messages = client.beta.threads.messages.list(thread_id=thread.id)
-        assistant_message = messages.data[0].content[0].text.value
+        messages = openai.Thread.list_messages(thread_id=thread.id)
+        assistant_message = messages.data[0].content[0].text
 
         logging.debug(f"Assistant Message: {assistant_message}")
         return jsonify({"message": assistant_message})
