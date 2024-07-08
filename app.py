@@ -1,11 +1,12 @@
-from flask import Flask, render_template, request, jsonify
-from openai import OpenAI
-from dotenv import load_dotenv
 import os
 import logging
 import certifi
+from flask import Flask, render_template, request, jsonify
+from openai import OpenAI
+from dotenv import load_dotenv
 
-load_dotenv()  # Load environment variables from .env file
+# Load environment variables from .env file (for local development)
+load_dotenv()
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
@@ -64,4 +65,6 @@ def chat():
         return jsonify({"message": f"Error: {str(e)}"})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Bind to PORT if defined, otherwise default to 5000.
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)
