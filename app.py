@@ -28,20 +28,21 @@ def chat():
     user_message = request.json['message']
     logging.debug(f"User Message: {user_message}")
 
+    headers = {
+        "Content-Type": "application/json",
+        "OpenAI-Beta": "assistants=v2"
+    }
+
     try:
-        headers = {
-            "Content-Type": "application/json",
-            "OpenAI-Beta": "assistants=v2"
-        }
         response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": user_message}
             ],
-            max_tokens=150,  # Increase this value to allow for longer responses
+            max_tokens=150,
             temperature=0.7,
-            headers=headers  # Include the required beta header
+            assistant_id=ASSISTANT_ID  # Specify the Assistant ID
         )
 
         if response:
