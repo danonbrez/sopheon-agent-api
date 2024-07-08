@@ -3,7 +3,6 @@ import openai
 from dotenv import load_dotenv
 import os
 import logging
-import requests
 import certifi
 
 load_dotenv()  # Load environment variables from .env file
@@ -14,7 +13,7 @@ logging.basicConfig(level=logging.DEBUG)
 # Load OpenAI API key from environment variable
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-# Define the Assistant ID from the screenshot
+# Define the Assistant ID
 ASSISTANT_ID = "asst_r0NRV1EEL2eup5TGf71WEyYK"
 
 # Ensure Certifi is used for SSL certificate verification
@@ -28,8 +27,7 @@ def index():
 def chat():
     user_message = request.json['message']
     logging.debug(f"User Message: {user_message}")
-    
-    # Define the payload for GPT-4 API using the chat/completions endpoint
+
     try:
         headers = {
             "Content-Type": "application/json",
@@ -43,10 +41,9 @@ def chat():
             ],
             max_tokens=150,  # Increase this value to allow for longer responses
             temperature=0.7,
-            user="assistant_id:" + ASSISTANT_ID,
             headers=headers  # Include the required beta header
         )
-        
+
         if response:
             assistant_message = response['choices'][0]['message']['content'].strip()
             logging.debug(f"Assistant Message: {assistant_message}")
@@ -61,15 +58,14 @@ def chat():
 def use_trigram_agents():
     query = request.json['query']
     logging.debug(f"Received query for trigram agents: {query}")
-    
+
     try:
-        # Send the request to the trigram agent API
         response = requests.post(
             "https://sopheon-agent-api-4cb6de5c7ca8.herokuapp.com/useTrigramAgents",
             json={"mainQuery": query},
             headers={"Content-Type": "application/json"}
         )
-        
+
         if response.status_code == 200:
             agent_response = response.json()
             logging.debug(f"Agent Response: {agent_response}")
