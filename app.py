@@ -1,24 +1,21 @@
 import os
 import logging
-import certifi
+import time
 from flask import Flask, render_template, request, jsonify
-from openai import OpenAI
+import openai
 from dotenv import load_dotenv
 
-# Load environment variables from .env file (for local development)
+# Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize the OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 # Define the Assistant ID
-ASSISTANT_ID = "asst_r0NRV1EEL2eup5TGf71WEyYK"
-
-# Ensure Certifi is used for SSL certificate verification
-os.environ["REQUESTS_CA_BUNDLE"] = certifi.where()
+ASSISTANT_ID = "asst_r0NRV1EEL2eup5TGf71WEyYK"  # Replace with your actual assistant ID
 
 @app.route('/')
 def index():
@@ -43,20 +40,29 @@ def chat():
         # Run the assistant
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
-            assistant_id=ASSISTANT_ID,
+            assistant_id=ASSISTANT_ID
         )
 
         # Wait for the run to complete
-        while run.status != "completed":
-            run = client.beta.threads.runs.retrieve(
+        while True:
+            run_status = client.beta.threads.runs.retrieve(
                 thread_id=thread.id,
                 run_id=run.id
             )
+            if run_status.status == 'completed':
+                break
+            time.sleep(1)  # Wait for 1 second before checking again
 
         # Retrieve the assistant's response
         messages = client.beta.threads.messages.list(thread_id=thread.id)
-        assistant_message = messages.data[0].content[0].text.value
-
+        assistant_message = next(
+            (m.content[0].text.value for m in messages.data if m.role == "assistant"), None
+        )
+        
+        if assistant_message is None:
+            logging.error("Assistant did not respond.")
+            return jsonify({"message": "Error: Assistant did not respond."})
+    
         logging.debug(f"Assistant Message: {assistant_message}")
         return jsonify({"message": assistant_message})
 
