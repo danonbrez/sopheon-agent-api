@@ -119,6 +119,10 @@
         .chat-footer button:hover {
             background: linear-gradient(45deg, #009900, #00ff00);
         }
+        .typing-indicator {
+            font-style: italic;
+            color: #00ff00;
+        }
     </style>
 </head>
 <body>
@@ -149,22 +153,30 @@
                 userInput.value = '';
                 userInput.style.height = 'auto';  // Reset the height
 
-                // Send message to server
-                fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: message }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Add assistant's response to chat
-                    addMessageToChat('assistant', data.message);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    addMessageToChat('assistant', 'Sorry, there was an error processing your request.');
+                // Show typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'message assistant-message typing-indicator';
+                typingIndicator.innerText = 'Assistant is typing...';
+                messagesDiv.appendChild(typingIndicator);
+                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+
+                // Start event source to receive the response
+                const eventSource = new EventSource('/stream');
+
+                eventSource.addEventListener('message', function(event) {
+                    if (event.data === 'typing') {
+                        // Keep the typing indicator if typing
+                        return;
+                    } else {
+                        // Remove typing indicator
+                        typingIndicator.remove();
+
+                        // Add assistant message to chat
+                        addMessageToChat('assistant', event.data);
+
+                        // Close event source when the response is complete
+                        eventSource.close();
+                    }
                 });
             }
         }
