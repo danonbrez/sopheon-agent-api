@@ -1,13 +1,17 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response
+from flask_sse import sse
 from openai import OpenAI
 from dotenv import load_dotenv
 import os
 import logging
 import certifi
+import time  # To simulate real-time typing
 
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
+app.config["REDIS_URL"] = "redis://localhost"
+app.register_blueprint(sse, url_prefix='/stream')
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize the OpenAI client
@@ -28,59 +32,47 @@ def chat():
     user_message = request.json['message']
     logging.debug(f"User Message: {user_message}")
 
-    try:
-        # Create a new thread for this conversation
-        thread = client.beta.threads.create()
+    def generate_response():
+        # Simulate real-time typing with a typing indicator
+        yield "data: typing\n\n"
+        
+        try:
+            # Create a new thread for this conversation
+            thread = client.beta.threads.create()
 
-        # Add the user's message to the thread
-        client.beta.threads.messages.create(
-            thread_id=thread.id,
-            role="user",
-            content=user_message
-        )
+            # Add the user's message to the thread
+            client.beta.threads.messages.create(
+                thread_id=thread.id,
+                role="user",
+                content=user_message
+            )
 
-        # Run the assistant
-        run = client.beta.threads.runs.create(
-            thread_id=thread.id,
-            assistant_id=ASSISTANT_ID,
-            model="gpt-4-turbo"  # Ensure correct model name
-        )
+            # Run the assistant
+            run = client.beta.threads.runs.create(
+                thread_id=thread.id,
+                assistant_id=ASSISTANT_ID,
+                model="gpt-4-turbo"
+            )
 
-        # Wait for the run to complete
-        while run.status != "completed":
-            run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+            # Wait for the run to complete
+            while run.status != "completed":
+                run = client.beta.threads.runs.retrieve(thread_id=thread.id, run_id=run.id)
+                time.sleep(1)
 
-        # Retrieve the assistant's response
-        messages = client.beta.threads.messages.list(thread_id=thread.id)
-        assistant_message = messages.data[0].content[0].text.value
+            # Retrieve the assistant's response
+            messages = client.beta.threads.messages.list(thread_id=thread.id)
+            assistant_message = messages.data[0].content[0].text.value
 
-        logging.debug(f"Assistant Message: {assistant_message}")
-        return jsonify({"message": assistant_message})
+            # Simulate typing out the response
+            for char in assistant_message:
+                yield f"data: {char}\n\n"
+                time.sleep(0.05)  # Adjust speed of typing here
 
-    except Exception as e:
-        logging.error(f"Error in chat endpoint: {str(e)}")
-        return jsonify({"message": f"Error: {str(e)}"})
+        except Exception as e:
+            logging.error(f"Error in chat endpoint: {str(e)}")
+            yield f"data: Error: {str(e)}\n\n"
 
-@app.route('/useTrigramAgents', methods=['POST'])
-def use_trigram_agents():
-    query = request.json['query']
-    logging.debug(f"Received query for trigram agents: {query}")
-    try:
-        response = requests.post(
-            "https://sopheon-agent-api-4cb6de5c7ca8.herokuapp.com/useTrigramAgents",
-            json={"mainQuery": query},
-            headers={"Content-Type": "application/json"}
-        )
-        if response.status_code == 200:
-            agent_response = response.json()
-            logging.debug(f"Agent Response: {agent_response}")
-            return jsonify(agent_response)
-        else:
-            logging.error(f"Agent API call failed with status code {response.status_code} and response: {response.text}")
-            return jsonify({"message": f"Agent API call failed with status code {response.status_code}", "details": response.text})
-    except Exception as e:
-        logging.error(f"Error in useTrigramAgents endpoint: {str(e)}")
-        return jsonify({"message": f"Error: {str(e)}"})
+    return Response(generate_response(), mimetype='text/event-stream')
 
 if __name__ == "__main__":
     app.run(debug=True)
