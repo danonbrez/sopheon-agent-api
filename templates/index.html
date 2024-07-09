@@ -84,6 +84,32 @@
             margin-right: auto;
             border-top-left-radius: 0;
         }
+        .typing-indicator {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+            font-size: 1em;
+            color: #00ff00;
+        }
+        .typing-indicator span {
+            display: inline-block;
+            animation: blink 1.4s infinite both;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes blink {
+            0%, 80%, 100% {
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+        }
         .chat-footer {
             padding: 15px;
             background: rgba(34, 34, 34, 0.9);
@@ -119,10 +145,6 @@
         .chat-footer button:hover {
             background: linear-gradient(45deg, #009900, #00ff00);
         }
-        .typing-indicator {
-            font-style: italic;
-            color: #00ff00;
-        }
     </style>
 </head>
 <body>
@@ -132,6 +154,9 @@
         </div>
         <div class="chat-body" id="messages">
             <!-- Messages will appear here -->
+        </div>
+        <div class="typing-indicator" id="typing-indicator">
+            <span>.</span><span>.</span><span>.</span>
         </div>
         <div class="chat-footer">
             <input type="text" id="user-input" placeholder="Type your message here..." autofocus>
@@ -143,6 +168,7 @@
         function sendMessage() {
             const userInput = document.getElementById('user-input');
             const messagesDiv = document.getElementById('messages');
+            const typingIndicator = document.getElementById('typing-indicator');
             const message = userInput.value.trim();
 
             if (message) {
@@ -154,29 +180,28 @@
                 userInput.style.height = 'auto';  // Reset the height
 
                 // Show typing indicator
-                const typingIndicator = document.createElement('div');
-                typingIndicator.className = 'message assistant-message typing-indicator';
-                typingIndicator.innerText = 'Assistant is typing...';
-                messagesDiv.appendChild(typingIndicator);
-                messagesDiv.scrollTop = messagesDiv.scrollHeight;
+                typingIndicator.style.display = 'flex';
 
-                // Start event source to receive the response
-                const eventSource = new EventSource('/stream');
+                // Send message to server
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide typing indicator
+                    typingIndicator.style.display = 'none';
 
-                eventSource.addEventListener('message', function(event) {
-                    if (event.data === 'typing') {
-                        // Keep the typing indicator if typing
-                        return;
-                    } else {
-                        // Remove typing indicator
-                        typingIndicator.remove();
-
-                        // Add assistant message to chat
-                        addMessageToChat('assistant', event.data);
-
-                        // Close event source when the response is complete
-                        eventSource.close();
-                    }
+                    // Add assistant's response to chat
+                    addMessageToChat('assistant', data.message);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    typingIndicator.style.display = 'none';
+                    addMessageToChat('assistant', 'Sorry, there was an error processing your request.');
                 });
             }
         }
