@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SOPHEON</title>
+    <title>Sopheon Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
@@ -12,38 +12,48 @@
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            background: #000; /* Dark background */
+            background: #1b1b1b;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: #0f0; /* Green text */
+            color: #00ff00;
+            overflow: hidden;
         }
         .chat-container {
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(34, 34, 34, 0.9);
             border-radius: 20px;
             width: 90%;
             max-width: 500px;
-            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5); /* Green shadow */
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            height: 80vh; /* Set a fixed height for the chat container */
         }
         .chat-header {
-            background: linear-gradient(45deg, #0f0, #006600); /* Green gradient */
+            background: linear-gradient(45deg, #00ff00, #009900);
             padding: 15px;
             text-align: center;
             font-size: 1.8em;
             font-weight: 700;
-            border-bottom: 2px solid #006600;
+            border-bottom: 2px solid #009900;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .chat-header img {
+            height: 40px;
+            margin-right: 10px;
+            border-radius: 50%;
         }
         .chat-body {
             padding: 20px;
             flex: 1;
-            overflow-y: auto;
+            overflow-y: auto; /* Make the chat body scrollable */
             display: flex;
             flex-direction: column;
-            max-height: 70vh;
+            max-height: calc(100% - 80px); /* Adjust max-height to fit within the container */
         }
         .message {
             margin: 10px 0;
@@ -52,7 +62,8 @@
             position: relative;
             font-size: 1em;
             line-height: 1.5;
-            background: rgba(0, 255, 0, 0.1); /* Light green background */
+            background: rgba(0, 255, 0, 0.1);
+            backdrop-filter: blur(10px);
             word-wrap: break-word;
             white-space: pre-wrap;
             display: flex;
@@ -63,12 +74,11 @@
             flex: 1;
             margin: 0;
             padding-right: 10px;
-            cursor: text;
         }
         .message button {
-            background: rgba(0, 255, 0, 0.2); /* Light green button */
+            background: rgba(0, 255, 0, 0.2);
             border: none;
-            color: #0f0; /* Green text */
+            color: #00ff00;
             padding: 5px 10px;
             border-radius: 10px;
             cursor: pointer;
@@ -86,9 +96,9 @@
         }
         .chat-footer {
             padding: 15px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(34, 34, 34, 0.9);
             display: flex;
-            border-top: 2px solid #006600;
+            border-top: 2px solid #009900;
         }
         .chat-footer input {
             flex: 1;
@@ -96,33 +106,35 @@
             border: none;
             border-radius: 20px;
             margin-right: 10px;
-            background: rgba(0, 255, 0, 0.1); /* Light green input */
-            color: #0f0; /* Green text */
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
             font-size: 1em;
-            transition: background 0.3s ease;
+            resize: none;
+            overflow: hidden;
         }
         .chat-footer input:focus {
             outline: none;
-            background: rgba(0, 255, 0, 0.2); /* Darker green on focus */
+            background: rgba(0, 255, 0, 0.2);
         }
         .chat-footer button {
             padding: 10px 20px;
             border: none;
             border-radius: 20px;
-            background: linear-gradient(45deg, #0f0, #006600); /* Green gradient */
-            color: #0f0;
+            background: linear-gradient(45deg, #00ff00, #009900);
+            color: #fff;
             font-size: 1em;
             cursor: pointer;
             transition: background 0.3s ease;
         }
         .chat-footer button:hover {
-            background: linear-gradient(45deg, #006600, #0f0); /* Reversed gradient on hover */
+            background: linear-gradient(45deg, #009900, #00ff00);
         }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="chat-header">
+            <img src="{{ url_for('static', filename='icon.png') }}" alt="Icon">
             Sopheon Assistant
         </div>
         <div class="chat-body" id="messages">
@@ -146,6 +158,7 @@
 
                 // Clear input field
                 userInput.value = '';
+                userInput.style.height = 'auto';  // Reset the height
 
                 // Send message to server
                 fetch('/chat', {
@@ -203,6 +216,12 @@
             if (event.key === 'Enter') {
                 sendMessage();
             }
+        });
+
+        // Automatically adjust the height of the input field
+        document.getElementById('user-input').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
         });
     </script>
 </body>
