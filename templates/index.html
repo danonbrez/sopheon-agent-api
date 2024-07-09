@@ -12,13 +12,12 @@
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            background: #1b1b1b;
+            background: #000;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
             color: #00ff00;
-            overflow: hidden;
         }
         .chat-container {
             background: rgba(34, 34, 34, 0.9);
@@ -29,7 +28,7 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            height: 80vh; /* Set a fixed height for the chat container */
+            height: 80vh;
         }
         .chat-header {
             background: linear-gradient(45deg, #00ff00, #009900);
@@ -42,10 +41,10 @@
         .chat-body {
             padding: 20px;
             flex: 1;
-            overflow-y: auto; /* Make the chat body scrollable */
+            overflow-y: auto;
             display: flex;
             flex-direction: column;
-            max-height: calc(100% - 80px); /* Adjust max-height to fit within the container */
+            max-height: calc(100% - 80px);
         }
         .message {
             margin: 10px 0;
@@ -74,7 +73,7 @@
             cursor: pointer;
         }
         .message.user-message {
-            background: rgba(0, 255, 0, 0.2);
+            background: rgba(0, 128, 0, 0.2);
             margin-left: auto;
             text-align: right;
             border-top-right-radius: 0;
