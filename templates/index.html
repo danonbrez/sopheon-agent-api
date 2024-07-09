@@ -12,32 +12,30 @@
             margin: 0;
             padding: 0;
             font-family: 'Roboto', sans-serif;
-            background: url('{{ url_for('static', filename='background-image.jpg') }}') no-repeat center center fixed;
-            background-size: cover;
+            background: #000; /* Dark background */
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            color: #fff;
-            overflow: hidden;
+            color: #0f0; /* Green text */
         }
         .chat-container {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.8);
             border-radius: 20px;
-            width: 400px;
-            max-width: 100%;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.5); /* Green shadow */
             overflow: hidden;
             display: flex;
             flex-direction: column;
         }
         .chat-header {
-            background: linear-gradient(45deg, #ff0066, #6600ff);
+            background: linear-gradient(45deg, #0f0, #006600); /* Green gradient */
             padding: 15px;
             text-align: center;
             font-size: 1.8em;
             font-weight: 700;
-            border-bottom: 2px solid #6600ff;
+            border-bottom: 2px solid #006600;
         }
         .chat-body {
             padding: 20px;
@@ -45,7 +43,7 @@
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            max-height: 70vh; /* Ensure the chat body does not exceed the viewport height */
+            max-height: 70vh;
         }
         .message {
             margin: 10px 0;
@@ -54,10 +52,9 @@
             position: relative;
             font-size: 1em;
             line-height: 1.5;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            word-wrap: break-word; /* Ensure long words break correctly */
-            white-space: pre-wrap; /* Preserve whitespace and allow line breaks */
+            background: rgba(0, 255, 0, 0.1); /* Light green background */
+            word-wrap: break-word;
+            white-space: pre-wrap;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -65,33 +62,33 @@
         .message p {
             flex: 1;
             margin: 0;
-            padding-right: 10px; /* Space for the copy button */
-            cursor: text; /* Indicate the message is editable */
+            padding-right: 10px;
+            cursor: text;
         }
         .message button {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 255, 0, 0.2); /* Light green button */
             border: none;
-            color: #fff;
+            color: #0f0; /* Green text */
             padding: 5px 10px;
             border-radius: 10px;
             cursor: pointer;
         }
         .message.user-message {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 255, 0, 0.1);
             margin-left: auto;
             text-align: right;
             border-top-right-radius: 0;
         }
         .message.assistant-message {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 255, 0, 0.1);
             margin-right: auto;
             border-top-left-radius: 0;
         }
         .chat-footer {
             padding: 15px;
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.8);
             display: flex;
-            border-top: 2px solid #6600ff;
+            border-top: 2px solid #006600;
         }
         .chat-footer input {
             flex: 1;
@@ -99,26 +96,27 @@
             border: none;
             border-radius: 20px;
             margin-right: 10px;
-            background: rgba(255, 255, 255, 0.1);
-            color: #fff;
+            background: rgba(0, 255, 0, 0.1); /* Light green input */
+            color: #0f0; /* Green text */
             font-size: 1em;
+            transition: background 0.3s ease;
         }
         .chat-footer input:focus {
             outline: none;
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(0, 255, 0, 0.2); /* Darker green on focus */
         }
         .chat-footer button {
             padding: 10px 20px;
             border: none;
             border-radius: 20px;
-            background: linear-gradient(45deg, #ff0066, #6600ff);
-            color: #fff;
+            background: linear-gradient(45deg, #0f0, #006600); /* Green gradient */
+            color: #0f0;
             font-size: 1em;
             cursor: pointer;
             transition: background 0.3s ease;
         }
         .chat-footer button:hover {
-            background: linear-gradient(45deg, #6600ff, #ff0066);
+            background: linear-gradient(45deg, #006600, #0f0); /* Reversed gradient on hover */
         }
     </style>
 </head>
