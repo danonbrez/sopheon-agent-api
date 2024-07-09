@@ -42,7 +42,8 @@ def chat():
         # Run the assistant
         run = client.beta.threads.runs.create(
             thread_id=thread.id,
-            assistant_id=ASSISTANT_ID
+            assistant_id=ASSISTANT_ID,
+            model="gpt-4-turbo"  # Ensure correct model name
         )
 
         # Wait for the run to complete
@@ -60,7 +61,26 @@ def chat():
         logging.error(f"Error in chat endpoint: {str(e)}")
         return jsonify({"message": f"Error: {str(e)}"})
 
-# ... (rest of your code remains the same)
+@app.route('/useTrigramAgents', methods=['POST'])
+def use_trigram_agents():
+    query = request.json['query']
+    logging.debug(f"Received query for trigram agents: {query}")
+    try:
+        response = requests.post(
+            "https://sopheon-agent-api-4cb6de5c7ca8.herokuapp.com/useTrigramAgents",
+            json={"mainQuery": query},
+            headers={"Content-Type": "application/json"}
+        )
+        if response.status_code == 200:
+            agent_response = response.json()
+            logging.debug(f"Agent Response: {agent_response}")
+            return jsonify(agent_response)
+        else:
+            logging.error(f"Agent API call failed with status code {response.status_code} and response: {response.text}")
+            return jsonify({"message": f"Agent API call failed with status code {response.status_code}", "details": response.text})
+    except Exception as e:
+        logging.error(f"Error in useTrigramAgents endpoint: {str(e)}")
+        return jsonify({"message": f"Error: {str(e)}"})
 
 if __name__ == "__main__":
     app.run(debug=True)
