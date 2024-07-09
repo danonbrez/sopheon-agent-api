@@ -38,14 +38,6 @@
             font-size: 1.8em;
             font-weight: 700;
             border-bottom: 2px solid #009900;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .chat-header img {
-            height: 40px;
-            margin-right: 10px;
-            border-radius: 50%;
         }
         .chat-body {
             padding: 20px;
@@ -62,8 +54,6 @@
             position: relative;
             font-size: 1em;
             line-height: 1.5;
-            background: rgba(0, 255, 0, 0.1);
-            backdrop-filter: blur(10px);
             word-wrap: break-word;
             white-space: pre-wrap;
             display: flex;
@@ -84,7 +74,7 @@
             cursor: pointer;
         }
         .message.user-message {
-            background: rgba(0, 255, 0, 0.1);
+            background: rgba(0, 255, 0, 0.2);
             margin-left: auto;
             text-align: right;
             border-top-right-radius: 0;
@@ -134,7 +124,6 @@
 <body>
     <div class="chat-container">
         <div class="chat-header">
-            <img src="{{ url_for('static', filename='icon.png') }}" alt="Icon">
             Sopheon Assistant
         </div>
         <div class="chat-body" id="messages">
