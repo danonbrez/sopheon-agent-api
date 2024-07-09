@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
 
         body {
             margin: 0;
@@ -20,7 +21,9 @@
             color: #00ff00;
         }
         .chat-container {
-            background: rgba(34, 34, 34, 0.9);
+            background: rgba(34, 34, 34, 0.95);
+            background-image: url('{{ url_for('static', filename='background-container.jpg') }}');
+            background-size: cover;
             border-radius: 20px;
             width: 90%;
             max-width: 500px;
@@ -31,12 +34,16 @@
             height: 80vh;
         }
         .chat-header {
-            background: linear-gradient(45deg, #00ff00, #009900);
+            background: #003300;
+            background-image: url('{{ url_for('static', filename='background-header.jpg') }}');
+            background-size: cover;
             padding: 15px;
             text-align: center;
             font-size: 1.8em;
             font-weight: 700;
-            border-bottom: 2px solid #009900;
+            font-family: 'Orbitron', sans-serif;
+            border-bottom: 2px solid #005500;
+            color: #00ff00;
         }
         .chat-body {
             padding: 20px;
@@ -45,6 +52,8 @@
             display: flex;
             flex-direction: column;
             max-height: calc(100% - 80px);
+            background-image: url('{{ url_for('static', filename='background-body.jpg') }}');
+            background-size: cover;
         }
         .message {
             margin: 10px 0;
@@ -58,6 +67,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #000;
+            color: #00ff00;
         }
         .message p {
             flex: 1;
@@ -73,15 +84,21 @@
             cursor: pointer;
         }
         .message.user-message {
-            background: rgba(0, 128, 0, 0.2);
+            background: rgba(0, 64, 0, 0.8);
+            background-image: url('{{ url_for('static', filename='background-user.jpg') }}');
+            background-size: cover;
             margin-left: auto;
             text-align: right;
             border-top-right-radius: 0;
+            color: #00ff00;
         }
         .message.assistant-message {
-            background: rgba(0, 255, 0, 0.1);
+            background: rgba(0, 128, 0, 0.8);
+            background-image: url('{{ url_for('static', filename='background-assistant.jpg') }}');
+            background-size: cover;
             margin-right: auto;
             border-top-left-radius: 0;
+            color: #000;
         }
         .typing-indicator {
             display: none;
@@ -111,9 +128,11 @@
         }
         .chat-footer {
             padding: 15px;
-            background: rgba(34, 34, 34, 0.9);
+            background: rgba(34, 34, 34, 0.95);
+            background-image: url('{{ url_for('static', filename='background-footer.jpg') }}');
+            background-size: cover;
             display: flex;
-            border-top: 2px solid #009900;
+            border-top: 2px solid #005500;
         }
         .chat-footer input {
             flex: 1;
@@ -135,14 +154,14 @@
             padding: 10px 20px;
             border: none;
             border-radius: 20px;
-            background: linear-gradient(45deg, #00ff00, #009900);
+            background: linear-gradient(45deg, #00ff00, #005500);
             color: #fff;
             font-size: 1em;
             cursor: pointer;
             transition: background 0.3s ease;
         }
         .chat-footer button:hover {
-            background: linear-gradient(45deg, #009900, #00ff00);
+            background: linear-gradient(45deg, #005500, #00ff00);
         }
     </style>
 </head>
@@ -235,13 +254,6 @@
             document.execCommand('copy');
             document.body.removeChild(textarea);
         }
-
-        // Allow sending message with Enter key
-        document.getElementById('user-input').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                sendMessage();
-            }
-        });
 
         // Automatically adjust the height of the input field
         document.getElementById('user-input').addEventListener('input', function() {
