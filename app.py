@@ -8,7 +8,7 @@ import certifi
 load_dotenv()  # Load environment variables from .env file
 
 app = Flask(__name__)
-app.secret_key = 'your_secret_key'  # Replace with your secret key for session management
+app.secret_key = os.urandom(24)  # For session management
 logging.basicConfig(level=logging.DEBUG)
 
 # Initialize the OpenAI client
@@ -31,12 +31,13 @@ def chat():
 
     try:
         # Check if a thread ID exists in the session
-        if 'thread_id' not in session:
-            # Create a new thread for this conversation if no thread exists
+        thread_id = session.get('thread_id')
+        
+        if not thread_id:
+            # Create a new thread for this conversation if it doesn't exist
             thread = client.beta.threads.create()
-            session['thread_id'] = thread.id
-
-        thread_id = session['thread_id']
+            thread_id = thread.id
+            session['thread_id'] = thread_id  # Store the thread ID in the session
 
         # Add the user's message to the thread
         client.beta.threads.messages.create(
@@ -65,6 +66,27 @@ def chat():
 
     except Exception as e:
         logging.error(f"Error in chat endpoint: {str(e)}")
+        return jsonify({"message": f"Error: {str(e)}"})
+
+@app.route('/useTrigramAgents', methods=['POST'])
+def use_trigram_agents():
+    query = request.json['query']
+    logging.debug(f"Received query for trigram agents: {query}")
+    try:
+        response = requests.post(
+            "https://sopheon-agent-api-4cb6de5c7ca8.herokuapp.com/useTrigramAgents",
+            json={"mainQuery": query},
+            headers={"Content-Type": "application/json"}
+        )
+        if response.status_code == 200:
+            agent_response = response.json()
+            logging.debug(f"Agent Response: {agent_response}")
+            return jsonify(agent_response)
+        else:
+            logging.error(f"Agent API call failed with status code {response.status_code} and response: {response.text}")
+            return jsonify({"message": f"Agent API call failed with status code {response.status_code}", "details": response.text})
+    except Exception as e:
+        logging.error(f"Error in useTrigramAgents endpoint: {str(e)}")
         return jsonify({"message": f"Error: {str(e)}"})
 
 if __name__ == "__main__":
