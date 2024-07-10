@@ -180,4 +180,101 @@
 <body>
     <div class="chat-container">
         <div class="background-text">
-            An AI assistant using a blockchain system of autonomous agents each aligned
+            An AI assistant using a blockchain system of autonomous agents each aligned with human values. Sopheon is more than an AI assistant; it is a guide, a philosopher, and a storyteller, weaving wisdom, truth, and love into every interaction.
+        </div>
+        <div class="chat-header">
+            Sopheon Assistant
+        </div>
+        <div class="chat-body" id="messages">
+            <!-- Messages will appear here -->
+        </div>
+        <div class="typing-indicator" id="typing-indicator">
+            <span>.</span><span>.</span><span>.</span>
+        </div>
+        <div class="chat-footer">
+            <input type="text" id="user-input" placeholder="Type your message here..." autofocus>
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            const userInput = document.getElementById('user-input');
+            const messagesDiv = document.getElementById('messages');
+            const typingIndicator = document.getElementById('typing-indicator');
+            const message = userInput.value.trim();
+
+            if (message) {
+                // Add user message to chat
+                addMessageToChat('user', message);
+
+                // Clear input field
+                userInput.value = '';
+                userInput.style.height = 'auto';  // Reset the height
+
+                // Show typing indicator
+                typingIndicator.style.display = 'flex';
+
+                // Send message to server
+                fetch('/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Hide typing indicator
+                    typingIndicator.style.display = 'none';
+
+                    // Add assistant's response to chat
+                    addMessageToChat('assistant', data.message);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    typingIndicator.style.display = 'none';
+                    addMessageToChat('assistant', 'Sorry, there was an error processing your request.');
+                });
+            }
+        }
+
+        function addMessageToChat(role, content) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${role}-message`;
+            
+            const messageText = document.createElement('p');
+            messageText.contentEditable = true;
+            messageText.textContent = content;
+
+            const copyButton = document.createElement('button');
+            copyButton.textContent = 'Copy';
+            copyButton.onclick = function() {
+                copyToClipboard(content);
+            };
+
+            messageDiv.appendChild(messageText);
+            messageDiv.appendChild(copyButton);
+
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        // Automatically adjust the height of the input field
+        document.getElementById('user-input').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>
