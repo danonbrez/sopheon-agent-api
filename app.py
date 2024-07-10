@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, jsonify
-from openai import OpenAI
+import openai
 from dotenv import load_dotenv
 import os
 import logging
@@ -10,8 +10,8 @@ load_dotenv()  # Load environment variables from .env file
 app = Flask(__name__)
 logging.basicConfig(level=logging.DEBUG)
 
-# Initialize the OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Load OpenAI API key from environment variable
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 # Define the Assistant ID
 ASSISTANT_ID = "asst_r0NRV1EEL2eup5TGf71WEyYK"
@@ -28,8 +28,11 @@ def index():
 
 def start_new_thread():
     global thread_id
-    response = client.threads.create(
-        assistant_id=ASSISTANT_ID
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."}
+        ]
     )
     thread_id = response['id']
 
@@ -38,29 +41,25 @@ def add_message_to_thread(role, content):
     if thread_id is None:
         start_new_thread()
 
-    client.threads.messages.create(
-        thread_id=thread_id,
-        role=role,
-        content=content
+    openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": role, "content": content}
+        ],
+        thread_id=thread_id
     )
 
 def get_assistant_response():
     global thread_id
-    response = client.threads.runs.create(
-        thread_id=thread_id,
-        assistant_id=ASSISTANT_ID
-    )
-    while response['status'] != 'completed':
-        response = client.threads.runs.retrieve(
-            thread_id=thread_id,
-            run_id=response['id']
-        )
-    
-    messages = client.threads.messages.list(
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "user", "content": "Generate response based on the previous messages."}
+        ],
         thread_id=thread_id
     )
-    assistant_message = next(msg for msg in messages if msg['role'] == 'assistant')
-    return assistant_message['content']
+    assistant_message = response['choices'][0]['message']['content']
+    return assistant_message
 
 @app.route('/chat', methods=['POST'])
 def chat():
