@@ -31,13 +31,12 @@ def chat():
 
     try:
         # Check if a thread ID exists in the session
-        thread_id = session.get('thread_id')
-
-        if not thread_id:
+        if 'thread_id' not in session:
             # Create a new thread for this conversation if no thread exists
             thread = client.beta.threads.create()
             session['thread_id'] = thread.id
-            thread_id = thread.id
+
+        thread_id = session['thread_id']
 
         # Add the user's message to the thread
         client.beta.threads.messages.create(
