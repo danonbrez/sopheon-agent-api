@@ -23,6 +23,7 @@
             color: #00ff00;
         }
         .chat-container {
+            position: relative; /* Added for positioning the background text */
             background: #000;
             border-radius: 20px;
             width: 90%;
@@ -159,10 +160,28 @@
         .chat-footer button:hover {
             background: linear-gradient(45deg, #005500, #00ff00);
         }
+        .background-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            text-align: center;
+            color: rgba(220, 220, 220, 0.1); /* Whitish grey, very transparent */
+            pointer-events: none; /* Make sure the text is not interactable */
+            z-index: 0; /* Ensure it stays behind other elements */
+            width: 80%;
+        }
+        .chat-body, .chat-footer {
+            z-index: 1; /* Ensure these elements stay above the background text */
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
+        <div class="background-text">
+            An AI assistant using a blockchain system of autonomous agents each aligned with human values. Sopheon is more than an AI assistant; it is a guide, a philosopher, and a storyteller, weaving wisdom, truth, and love into every interaction.
+        </div>
         <div class="chat-header">
             Sopheon Assistant
         </div>
