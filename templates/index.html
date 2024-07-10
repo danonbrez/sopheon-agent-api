@@ -6,107 +6,178 @@
     <title>Sopheon Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
     <style>
-        /* Your existing styles */
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Roboto', sans-serif;
+            background: rgba(34, 34, 34, 0.95);
+            background-image: url('{{ url_for('static', filename='background-container.jpg') }}');
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #00ff00;
+        }
+        .chat-container {
+            position: relative; /* Added for positioning the background text */
+            background: #000;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        .chat-header {
+            background: #003300;
+            background-image: url('{{ url_for('static', filename='background-header.jpg') }}');
+            background-size: cover;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.8em;
+            font-weight: 700;
+            font-family: 'Orbitron', sans-serif;
+            border-bottom: 2px solid #005500;
+            color: #00ff00;
+        }
+        .chat-body {
+            padding: 20px;
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            max-height: calc(100% - 80px);
+            background-image: url('{{ url_for('static', filename='background-body.jpg') }}');
+            background-size: cover;
+        }
+        .message {
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 20px;
+            position: relative;
+            font-size: 1em;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #000;
+            color: #dcdcdc; /* Whitish grey text */
+        }
+        .message p {
+            flex: 1;
+            margin: 0;
+            padding-right: 10px;
+        }
+        .message button {
+            background: rgba(0, 255, 0, 0.2);
+            border: none;
+            color: #00ff00;
+            padding: 5px 10px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        .message.user-message {
+            background: rgba(0, 64, 0, 0.8);
+            background-image: url('{{ url_for('static', filename='background-user.jpg') }}');
+            background-size: cover;
+            margin-left: auto;
+            text-align: right;
+            border-top-right-radius: 0;
+        }
+        .message.assistant-message {
+            background: rgba(0, 128, 0, 0.8);
+            background-image: url('{{ url_for('static', filename='background-assistant.jpg') }}');
+            background-size: cover;
+            margin-right: auto;
+            border-top-left-radius: 0;
+        }
+        .typing-indicator {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            height: 40px;
+            font-size: 1em;
+            color: #00ff00;
+        }
+        .typing-indicator span {
+            display: inline-block;
+            animation: blink 1.4s infinite both;
+        }
+        .typing-indicator span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        .typing-indicator span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        @keyframes blink {
+            0%, 80%, 100% {
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+        }
+        .chat-footer {
+            padding: 15px;
+            background: #000;
+            display: flex;
+            border-top: 2px solid #005500;
+        }
+        .chat-footer input {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 20px;
+            margin-right: 10px;
+            background: rgba(0, 255, 0, 0.1);
+            color: #00ff00;
+            font-size: 1em;
+            resize: none;
+            overflow: hidden;
+        }
+        .chat-footer input:focus {
+            outline: none;
+            background: rgba(0, 255, 0, 0.2);
+        }
+        .chat-footer button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 20px;
+            background: linear-gradient(45deg, #00ff00, #005500);
+            color: #fff;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        .chat-footer button:hover {
+            background: linear-gradient(45deg, #005500, #00ff00);
+        }
+        .background-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2em;
+            text-align: center;
+            color: rgba(220, 220, 220, 0.1); /* Whitish grey, very transparent */
+            pointer-events: none; /* Make sure the text is not interactable */
+            z-index: 0; /* Ensure it stays behind other elements */
+            width: 80%;
+        }
+        .chat-body, .chat-footer {
+            z-index: 1; /* Ensure these elements stay above the background text */
+        }
     </style>
 </head>
 <body>
     <div class="chat-container">
         <div class="background-text">
-            An AI assistant using a blockchain system of autonomous agents each aligned with human values. Sopheon is more than an AI assistant; it is a guide, a philosopher, and a storyteller, weaving wisdom, truth, and love into every interaction.
-        </div>
-        <div class="chat-header">
-            Sopheon Assistant
-        </div>
-        <div class="chat-body" id="messages">
-            <!-- Messages will appear here -->
-        </div>
-        <div class="typing-indicator" id="typing-indicator">
-            <span>.</span><span>.</span><span>.</span>
-        </div>
-        <div class="chat-footer">
-            <input type="text" id="user-input" placeholder="Type your message here..." autofocus>
-            <button onclick="sendMessage()">Send</button>
-        </div>
-    </div>
-
-    <script>
-        function sendMessage() {
-            const userInput = document.getElementById('user-input');
-            const messagesDiv = document.getElementById('messages');
-            const typingIndicator = document.getElementById('typing-indicator');
-            const message = userInput.value.trim();
-
-            if (message) {
-                // Add user message to chat
-                addMessageToChat('user', message);
-
-                // Clear input field
-                userInput.value = '';
-                userInput.style.height = 'auto';  // Reset the height
-
-                // Show typing indicator
-                typingIndicator.style.display = 'flex';
-
-                // Send message to server
-                fetch('/chat', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ message: message }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Hide typing indicator
-                    typingIndicator.style.display = 'none';
-
-                    // Add assistant's response to chat
-                    addMessageToChat('assistant', data.message);
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    typingIndicator.style.display = 'none';
-                    addMessageToChat('assistant', 'Sorry, there was an error processing your request.');
-                });
-            }
-        }
-
-        function addMessageToChat(role, content) {
-            const messagesDiv = document.getElementById('messages');
-            const messageDiv = document.createElement('div');
-            messageDiv.className = `message ${role}-message`;
-            
-            const messageText = document.createElement('p');
-            messageText.contentEditable = true;
-            messageText.textContent = content;
-
-            const copyButton = document.createElement('button');
-            copyButton.textContent = 'Copy';
-            copyButton.onclick = function() {
-                copyToClipboard(content);
-            };
-
-            messageDiv.appendChild(messageText);
-            messageDiv.appendChild(copyButton);
-
-            messagesDiv.appendChild(messageDiv);
-            messagesDiv.scrollTop = messagesDiv.scrollHeight;
-        }
-
-        function copyToClipboard(text) {
-            const textarea = document.createElement('textarea');
-            textarea.value = text;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-        }
-
-        // Automatically adjust the height of the input field
-        document.getElementById('user-input').addEventListener('input', function() {
-            this.style.height = 'auto';
-            this.style.height = (this.scrollHeight) + 'px';
-        });
-    </script>
-</body>
-</html>
+            An AI assistant using a blockchain system of autonomous agents each aligned
